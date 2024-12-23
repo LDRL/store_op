@@ -1,5 +1,10 @@
+const bcrypt = require('bcrypt');
 const { response, request } = require('express')
+
+
 const {dbConnect} = require('../config/db/connection');
+const { hashPassword } = require('../utils/auth');
+
 // const sql = require('mssql');
 
 const usuariosGet = async (req= request, res= response) => {
@@ -17,11 +22,6 @@ const usuariosGet = async (req= request, res= response) => {
         return res.status(400).json({ msg: 'Límite inválido' });
     }
 
-    console.log(req.query, "query-----")
-    console.log("limit number", limitNumber);
-    console.log("----")
-
-    // const result = await dbConnect.query('EXEC UsuarioListar', { type: dbConnect.QueryTypes.SELECT });
 
     try {
         const result = await dbConnect.query(
@@ -39,12 +39,9 @@ const usuariosGet = async (req= request, res= response) => {
                 replacements: { page: pageNumber, limit: limitNumber, search: search },
                 type: dbConnect.QueryTypes.SELECT
             });
-            
-        // console.log(totalCountResult, "total count");
-
 
         const total = result[result.length - 1]?.Total || 0; 
-        console.log(total);
+
 
         // Calcular el número total de páginas
         const totalPages = Math.ceil(total / limitNumber);
@@ -75,12 +72,35 @@ const getUsuario = (req= request, res= response) => {
     })
 }
 
-const usuariosPost = (req, res= response) => {
-    const { body} = req
-    res.status(201).json({
-        msg: 'post API - controller',
-        body
-    })
+const usuariosPost = async (req, res= response) => {
+    const { email, nombre, contraseña, telefono, fecha_nacimiento, id_rol } = req.body;
+    const hashedPassword = await hashPassword(contraseña)
+
+    try {
+        const result = await dbConnect.query(
+            `EXEC UsuarioInsertar @P_CORREO_ELECTRONICO = ?,
+            @P_NOMBRE = ?,
+            @P_PASSWORD = ?,
+            @P_TELEFONO = ?,
+            @P_FECHA_NACIMIENTO = ?,
+            @P_ID_ROL = ?`,
+            {
+                replacements: [email, nombre, hashedPassword, telefono, fecha_nacimiento, id_rol],
+                type: dbConnect.QueryTypes.SELECT
+            }
+        );
+        res.status(201).json({
+            msg: 'usuaio creado correctamente',
+            data: result
+        })
+        
+    } catch (error) {
+        console.error('Error al insertar el usuario:', error);
+        res.status(500).json({
+            msg: 'Hubo un error al insertar el producto',
+            error: error.message
+        });
+    }
 }
 const usuariosPut = (req, res= response) => {
     const {id} = req.params

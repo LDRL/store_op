@@ -7,6 +7,8 @@ const { body, validationResult } = require('express-validator');
 const getCategorias = async (req= request, res= response) => {
     const { page = 1, limite = 10, search = '' } = req.query;
 
+    console.log(req.user);
+
     // Asegurarse de que los valores de la página y límite sean enteros válidos
     const pageNumber = parseInt(page);
     const limitNumber = parseInt(limite);
@@ -29,7 +31,6 @@ const getCategorias = async (req= request, res= response) => {
         );
 
         const total = result[result.length - 1]?.Total || 0; 
-        console.log(total);
 
         // Calcular el número total de páginas
         const totalPages = Math.ceil(total / limitNumber);
