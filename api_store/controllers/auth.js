@@ -10,7 +10,6 @@ const login = async (req, res= response) => {
         const { email, contraseña } = req.body;
 
         const user = await buscarUsuarioPorCorreo(email);
-        console.log("=iuser------",user)
         if(!user){
             const error = new Error('Usuario no encontrado')
             return res.status(401).json({error: error.message})
@@ -22,27 +21,8 @@ const login = async (req, res= response) => {
             return res.status(401).json({error: error.message})
         }
 
-
         const token = generateJWT(user[0].id_usuario, user[0].nombre, user[0].correo_electronico)
         res.send(token)
-
-
-        // const result = await dbConnect.query(
-        //     `EXEC UsuarioInsertar @P_CORREO_ELECTRONICO = ?,
-        //     @P_NOMBRE = ?,
-        //     @P_PASSWORD = ?,
-        //     @P_TELEFONO = ?,
-        //     @P_FECHA_NACIMIENTO = ?,
-        //     @P_ID_ROL = ?`,
-        //     {
-        //         replacements: [email, nombre, hashedPassword, telefono, fecha_nacimiento, id_rol],
-        //         type: dbConnect.QueryTypes.SELECT
-        //     }
-        // );
-        // res.status(201).json({
-        //     msg: 'usuaio creado correctamente',
-        //     data: result
-        // })
         
     } catch (error) {
         console.error('Error con el usuario:', error);

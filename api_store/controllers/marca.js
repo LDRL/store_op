@@ -6,7 +6,6 @@ const { body, validationResult } = require('express-validator');
 const getMarcas = async (req= request, res= response) => {
     const { page = 1, limite = 10, search = '' } = req.query;
 
-    // Asegurarse de que los valores de la página y límite sean enteros válidos
     const pageNumber = parseInt(page);
     const limitNumber = parseInt(limite);
 
@@ -28,14 +27,13 @@ const getMarcas = async (req= request, res= response) => {
         );
 
         const total = result[result.length - 1]?.Total || 0; 
-        console.log(total);
 
-        // Calcular el número total de páginas
+
         const totalPages = Math.ceil(total / limitNumber);
 
         res.json({
             msg: 'Marcas obtenidas con éxito',
-            data: result,  // Los registros de la página solicitada
+            data: result, 
             total: total,
             limit: limitNumber,
             currentPage: pageNumber,
@@ -54,7 +52,7 @@ const getMarcas = async (req= request, res= response) => {
 const getMarca = (req= request, res= response) => {
     const { id } = req.params;
     res.json({
-        msg: 'getUsuario',
+        msg: 'marcas obtenidas',
         id
     })
 }
@@ -71,7 +69,6 @@ const postMarcas = async (req, res= response) => {
     }
 
     const { nombre } = req.body;
-    console.log(nombre, "------- NOMBRE")
     
     try {
         const result = await dbConnect.query(
@@ -87,28 +84,63 @@ const postMarcas = async (req, res= response) => {
         })
         
     } catch (error) {
-        console.error('Error al insertar la categoría:', error);
+        console.error('Error al insertar la marca:', error);
         res.status(500).json({
-            msg: 'Hubo un error al insertar la categoría',
+            msg: 'Hubo un error al insertar la marca',
             error: error.message
         });
     }
 }
-const putMarcas = (req, res= response) => {
+const putMarcas = async (req, res= response) => {
     const {id} = req.params
-    const { body } = req
-    res.status(500).json({
-        msg: 'put API - controller',
-        id,
-        body
-    })
+    const { nombre } = req.body;
+    
+    try {
+        const result = await dbConnect.query(
+            `EXEC MarcaActualizar @P_NOMBRE = ?,
+            @P_ID_MARCA = ?`,            
+            {
+                replacements: [nombre, id],
+                type: dbConnect.QueryTypes.SELECT
+            }
+        );
+
+        res.status(201).json({
+            msg: 'marca actualizada correctamente',
+            data: result
+        })
+        
+    } catch (error) {
+        console.error('Error al actualizar la marca:', error);
+        res.status(500).json({
+            msg: 'Hubo un error al actualizar la marca',
+            error: error.message
+        });
+    }
 }
-const deleteMarca = (req, res= response) => {
+const deleteMarca = async (req, res= response) => {
     const { id } = req.params;
-    res.json({
-        msg: 'delete API - controller',
-        id
-    })
+    try {
+        const result = await dbConnect.query(
+            `EXEC MarcaEliminar @P_ID_MARCA = ?`,            
+            {
+                replacements: [id],
+                type: dbConnect.QueryTypes.SELECT
+            }
+        );
+        
+        res.status(201).json({
+            msg: 'marca eliminada correctamente',
+            data: result
+        })
+        
+    } catch (error) {
+        console.error('Error al eliminar la marca:', error);
+        res.status(500).json({
+            msg: 'Hubo un error al eliminar la marca',
+            error: error.message
+        });
+    }
 }
 
 module.exports = {getMarcas, getMarca, postMarcas, putMarcas, deleteMarca,validarMarca}

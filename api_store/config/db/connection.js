@@ -1,8 +1,5 @@
 const { Sequelize } = require('sequelize');
 
-// import { Sequelize } from '@sequelize/core';
-// import { MsSqlDialect } from '@sequelize/mssql';
-
 const database = process.env.SQL_DATABASE;
 const user = process.env.SQL_USER;
 const pass = process.env.SQL_PASSWORD;

@@ -6,7 +6,6 @@ const hashPassword = async (contraseña) => {
 }
 
 const checkPassword = async (contraseña, contraseña_encriptada) => {
-    console.log(contraseña, contraseña_encriptada);
     return await bcrypt.compare(contraseña, contraseña_encriptada)
 }
 

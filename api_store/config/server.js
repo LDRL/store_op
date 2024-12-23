@@ -13,6 +13,7 @@ class Server {
             categorias: '/api/categorias',
             marcas: '/api/marcas',
             productos: '/api/productos',
+            ordenes: '/api/ordenes',
 
         }
 
@@ -36,10 +37,7 @@ class Server {
 
         this.app.use(express.json());  
         this.app.use(express.urlencoded({ extended: true }));
-
-        // this.app.use(upload.single('image'));
-
-     
+    
 
         //Direccion publica
         this.app.use( express.static('public') )
@@ -50,11 +48,8 @@ class Server {
         this.app.use(this.paths.usuarios, require('../routes/usuarios'))
         this.app.use(this.paths.categorias, require('../routes/categorias'))
         this.app.use(this.paths.marcas, require('../routes/marcas'))
-        // this.app.use(this.paths.presentaciones, require('../routes/presentaciones'))
         this.app.use(this.paths.productos, require('../routes/productos'))
-        // this.app.use(this.paths.proveedor, require('../routes/proveedores'))
-        // this.app.use(this.paths.compras, require('../routes/compras'))
-        // this.app.use(this.paths.ordenes, require('../routes/ordenes'))
+        this.app.use(this.paths.ordenes, require('../routes/ordenes'))
         this.app.use('*',(req,res) => {
             res.status(404).json({
                 errors: {
@@ -67,7 +62,7 @@ class Server {
     listen() {
         this.app.listen(this.port, () => {
             console.log(`Server Backend Up run http://localhost:${this.port}`);
-          });        
+        });        
     }
 }
 

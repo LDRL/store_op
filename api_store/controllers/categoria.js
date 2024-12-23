@@ -7,9 +7,7 @@ const { body, validationResult } = require('express-validator');
 const getCategorias = async (req= request, res= response) => {
     const { page = 1, limite = 10, search = '' } = req.query;
 
-    console.log(req.user);
 
-    // Asegurarse de que los valores de la página y límite sean enteros válidos
     const pageNumber = parseInt(page);
     const limitNumber = parseInt(limite);
 
@@ -37,7 +35,7 @@ const getCategorias = async (req= request, res= response) => {
 
         res.json({
             msg: 'Categorias obtenidos con éxito',
-            data: result,  // Los registros de la página solicitada
+            data: result,
             total: total,
             limit: limitNumber,
             currentPage: pageNumber,
@@ -76,7 +74,6 @@ const postCategoria = async (req, res= response) => {
     }
 
     const { nombre } = req.body;
-    console.log(nombre, "------- NOMBRE")
     
     try {
         const result = await dbConnect.query(
@@ -99,21 +96,56 @@ const postCategoria = async (req, res= response) => {
         });
     }
 }
-const putCategoria = (req, res= response) => {
+const putCategoria = async (req, res= response) => {
     const {id} = req.params
-    const { body } = req
-    res.status(500).json({
-        msg: 'put API - controller',
-        id,
-        body
-    })
+    const { nombre } = req.body;
+    
+    try {
+        const result = await dbConnect.query(
+            `EXEC CategoriaProductoActualizar @P_NOMBRE = ?,
+            @P_ID_CATEGORIA_PRODUCTO = ?`,            
+            {
+                replacements: [nombre, id],
+                type: dbConnect.QueryTypes.SELECT
+            }
+        );
+
+        res.status(201).json({
+            msg: 'Categoría actualizada correctamente',
+            data: result
+        })
+        
+    } catch (error) {
+        console.error('Error al actualizar la categoría:', error);
+        res.status(500).json({
+            msg: 'Hubo un error al actualizar la categoría',
+            error: error.message
+        });
+    }
 }
-const deleteCategoria = (req, res= response) => {
+const deleteCategoria = async (req, res= response) => {
     const { id } = req.params;
-    res.json({
-        msg: 'delete API - controller',
-        id
-    })
+    try {
+        const result = await dbConnect.query(
+            `EXEC CategoriaProductoEliminar @P_ID_CATEGORIA_PRODUCTO = ?`,            
+            {
+                replacements: [id],
+                type: dbConnect.QueryTypes.SELECT
+            }
+        );
+        
+        res.status(201).json({
+            msg: 'Categoría eliminada correctamente',
+            data: result
+        })
+        
+    } catch (error) {
+        console.error('Error al eliminar la categoría:', error);
+        res.status(500).json({
+            msg: 'Hubo un error al eliminar la categoría',
+            error: error.message
+        });
+    }
 }
 
 module.exports = {getCategorias, getCategoria, postCategoria, putCategoria, deleteCategoria, validarCategoriaProducto}

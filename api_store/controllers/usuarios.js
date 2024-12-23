@@ -10,7 +10,6 @@ const { hashPassword } = require('../utils/auth');
 const usuariosGet = async (req= request, res= response) => {
     const { page = 1, limite = 10, search = '' } = req.query;
 
-    // Asegurarse de que los valores de la página y límite sean enteros válidos
     const pageNumber = parseInt(page);
     const limitNumber = parseInt(limite);
 
@@ -32,23 +31,13 @@ const usuariosGet = async (req= request, res= response) => {
             }
         );
 
-        // Ejecutar una segunda consulta para obtener el total de registros
-        const totalCountResult = await dbConnect.query(
-            'EXEC UsuarioListar @Page = :page, @Limit = :limit, @Search = :search',
-            {
-                replacements: { page: pageNumber, limit: limitNumber, search: search },
-                type: dbConnect.QueryTypes.SELECT
-            });
-
         const total = result[result.length - 1]?.Total || 0; 
 
-
-        // Calcular el número total de páginas
         const totalPages = Math.ceil(total / limitNumber);
 
         res.json({
             msg: 'Usuarios obtenidos con éxito',
-            data: result,  // Los registros de la página solicitada
+            data: result, 
             total: total,
             limit: limitNumber,
             currentPage: pageNumber,
@@ -102,21 +91,62 @@ const usuariosPost = async (req, res= response) => {
         });
     }
 }
-const usuariosPut = (req, res= response) => {
+
+const usuariosPut = async (req, res= response) => {
     const {id} = req.params
-    const { body } = req
-    res.status(500).json({
-        msg: 'put API - controller',
-        id,
-        body
-    })
+    const { email, nombre, telefono, fecha_nacimiento, id_rol } = req.body;
+    
+    try {
+        const result = await dbConnect.query(
+            `EXEC UsuarioActualizar @P_CORREO_ELECTRONICO = ?,
+            @P_NOMBRE = ?,
+            @P_TELEFONO = ?,
+            @P_FECHA_NACIMIENTO = ?,
+            @P_ID_ROL = ?,
+            @P_ID_USUARIO = ?`,
+            
+            {
+                replacements: [email, nombre, telefono, fecha_nacimiento, id_rol, id],
+                type: dbConnect.QueryTypes.SELECT
+            }
+        );
+
+        res.status(201).json({
+            msg: 'usuario actualizada correctamente',
+            data: result
+        })
+        
+    } catch (error) {
+        console.error('Error al actualizar la usuario:', error);
+        res.status(500).json({
+            msg: 'Hubo un error al actualizar la usuario',
+            error: error.message
+        });
+    }
 }
-const usuariosDelete = (req, res= response) => {
+const usuariosDelete = async (req, res= response) => {
     const { id } = req.params;
-    res.json({
-        msg: 'delete API - controller',
-        id
-    })
+    try {
+        const result = await dbConnect.query(
+            `EXEC UsuarioEliminar @P_ID_USUARIO = ?`,
+            {
+                replacements: [id],
+                type: dbConnect.QueryTypes.SELECT
+            }
+        );
+        
+        res.status(201).json({
+            msg: 'usuario eliminada correctamente',
+            data: result
+        })
+        
+    } catch (error) {
+        console.error('Error al eliminar la usuario:', error);
+        res.status(500).json({
+            msg: 'Hubo un error al eliminar la usuario',
+            error: error.message
+        });
+    }
 }
 
 module.exports = {usuariosGet, getUsuario, usuariosPost, usuariosPut, usuariosDelete}
