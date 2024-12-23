@@ -1,0 +1,8 @@
+PORT= puerto de escucha
+
+SQL_DATABASE= nombre de la base de datos
+SQL_USER= usuario de la base de datos
+SQL_PASSWORD= contrasenia de la base de datos
+SQL_HOST= host local
+
+JWT_SECRET= llave secreta para json web token
