@@ -1,6 +1,6 @@
 const { response, request } = require('express')
 const {dbConnect} = require('../config/db/connection');
-const { checkPassword } = require('../utils/auth');
+const { checkPassword, hashPassword } = require('../utils/auth');
 const { generateJWT } = require('../utils/jwt');
 
 
@@ -55,4 +55,35 @@ const buscarUsuarioPorCorreo = async (correo) => {
 };
 
 
-module.exports = {login}
+const resetPassword = async (req, res= response) => {
+
+    try {
+        const {id} = req.params
+        const { contraseña } = req.body;
+
+        const hashedPassword = await hashPassword(contraseña)
+
+        const result = await dbConnect.query(
+            `EXEC UsuarioPasswordActualizar @P_PASSWORD = ?,
+            @P_ID_USUARIO = ?`,            
+            {
+                replacements: [hashedPassword, id],
+                type: dbConnect.QueryTypes.SELECT
+            }
+        );
+
+        res.status(201).json({
+            msg: 'contraseña actualizada correctamente',
+            data: result
+        })
+        
+    } catch (error) {
+        console.error('Error con el usuario:', error);
+        res.status(500).json({
+            msg: 'Hubo un error al actualizar la contraseña',
+            error: error.message
+        });
+    }
+}
+
+module.exports = {login, resetPassword}
