@@ -4,9 +4,11 @@ const { authenticate } = require('../middleware/auth')
 
 const router = Router()
 
-router.get('/',authenticate, getCategorias )
+router.use(authenticate)
+
+router.get('/', getCategorias )
 router.get('/:id', getCategoria )
-router.post('/', validarCategoriaProducto,postCategoria )
+router.post('/', validarCategoriaProducto, postCategoria)
 router.put('/:id', putCategoria )
 router.delete('/:id', deleteCategoria )
 

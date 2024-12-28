@@ -6,10 +6,12 @@ const { body } = require('express-validator')
 
 const router = Router()
 
+router.use(authenticate)
+
+
 router.get('/', Getclientes )
 router.get('/:id', getCliente )
 router.post('/',
-    authenticate,
     body('razon_social').notEmpty().withMessage('razon social no puede ir vacio'),
     body('nombre_comercial').notEmpty().withMessage('razon social no puede ir vacio'),
     body('direccion_entrega').notEmpty().withMessage('razon social no puede ir vacio'),
