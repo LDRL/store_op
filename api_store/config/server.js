@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require('cors');
 const {dbConnnectonMySql} = require("./db/connection");
+const { corsConfig } = require("./cors");
 // const db = require("../models/mysql");
 //cors permite proteger el servidor
 class Server {
@@ -34,7 +35,7 @@ class Server {
 
     middlewares() {
         //cors
-        this.app.use( cors() )
+        this.app.use( cors(corsConfig) )
 
         this.app.use(express.json());  
         this.app.use(express.urlencoded({ extended: true }));

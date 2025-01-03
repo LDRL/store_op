@@ -1,35 +1,44 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+
+import React, { lazy, Suspense } from 'react';
 import './App.css'
+import CssBaseline from '@mui/material/CssBaseline';
+import { BrowserRouter, Navigate, Route } from 'react-router-dom';
+import RoutersWitNotFound from './utils/routers-with-not-found.utility';
+import { PrivateRoutes, PublicRoutes } from './utils/routes';
+import AuthGuard from './guards/auth.guard';
+import {AuthProvider} from './context/AuthProvider';
+import { ProductProvider } from './context/ProductProvider';
+
+
+
+const Login = lazy(() => import('./pages/public/Login/Login'))
+const Private = lazy(() => import('./pages/Private/Private'))
+
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <React.Fragment>
+      <CssBaseline />
+      <Suspense fallback={<>Cargando</>}>
+      <AuthProvider>
+        <ProductProvider>
+          <BrowserRouter>
+            <RoutersWitNotFound>
+              <Route path="/" element={<Navigate to ={PrivateRoutes.PRIVATE} />} />
+              <Route path="*" element={<>Not found</>}/>
+              <Route path={PublicRoutes.LOGIN} element={<Login />} />
+              <Route element={<AuthGuard />}>
+                <Route path={`${PrivateRoutes.PRIVATE}/*`} element={<Private />} />
+              </Route>
+            </RoutersWitNotFound>
+          </BrowserRouter>
+        </ProductProvider>
+      </AuthProvider>
+      </Suspense>
+
+    </React.Fragment>
+  );
+  
 }
 
 export default App

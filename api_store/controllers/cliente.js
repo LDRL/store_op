@@ -34,7 +34,7 @@ const Getclientes = async (req= request, res= response) => {
 
         res.json({
             msg: 'Usuarios obtenidos con éxito',
-            data: result, 
+            data: result.slice(0, result.length -1), 
             total: total,
             limit: limitNumber,
             currentPage: pageNumber,
@@ -50,13 +50,32 @@ const Getclientes = async (req= request, res= response) => {
     }
 }
 
-const getCliente = (req= request, res= response) => {
+const getCliente = async (req= request, res= response) => {
     const { id } = req.params;
-    res.json({
-        msg: 'get cliente',
-        id
-    })
+
+    try {
+        const result = await dbConnect.query(
+            `EXEC ClienteBuscarId @id = ?`,
+            {
+                replacements: [id],
+                type: dbConnect.QueryTypes.SELECT
+            }
+        );
+
+        if (result && result.length === 0) {
+            return null;  
+        }
+
+        res.json({
+            msg: 'get cliente',
+            data: result
+        })
+    } catch (error) {
+        console.error('Error al buscar el cliente:', error);
+        return null;  // En caso de error, retornamos null
+    }
 }
+
 
 const postCliente = async (req, res= response) => {
     const { razon_social, nombre_comercial, direccion_entrega, contraseña, telefono, fecha_nacimiento, email } = req.body;

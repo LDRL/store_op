@@ -1,7 +1,8 @@
 const { Router } = require('express')
 const { handleInputErrors } = require('../middleware/validacion')
 const { body } = require('express-validator')
-const { login, resetPassword } = require('../controllers/auth')
+const { login, resetPassword, user } = require('../controllers/auth')
+const { authenticate } = require('../middleware/auth')
 
 const router = Router()
 
@@ -24,6 +25,10 @@ router.put('/reset-password/:id',
     resetPassword
 )
 
+router.get('/user',
+    authenticate,
+    user
+)
 
 
 

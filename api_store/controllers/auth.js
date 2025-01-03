@@ -22,7 +22,13 @@ const login = async (req, res= response) => {
         }
 
         const token = generateJWT(user[0].id_usuario, user[0].nombre, user[0].correo_electronico)
-        res.send(token)
+        // res.send(token)
+
+
+        res.json({
+            msg: 'Inicio de sesion correcto',
+            data: token,
+        });
         
     } catch (error) {
         console.error('Error con el usuario:', error);
@@ -86,4 +92,31 @@ const resetPassword = async (req, res= response) => {
     }
 }
 
-module.exports = {login, resetPassword}
+const user = async (req, res = response) => {
+    return res.json(req.user)
+}
+
+const verify = async(req, res, next) => {
+    const token = req.header('Authorization');
+
+    if(!token){
+        return res.status(401).json({msg: 'Acceso denegado'})
+    }
+
+    try {
+        const newToken = token.startsWith('Bearer ') ? token.slice(7) : token;
+        
+        jwt.verify(newToken,  process.env.JWT_SECRET, (err,decoded) =>{
+            if(err){
+                return res.status(401).json({mensaje: 'Token no valido'});
+            }
+
+            // req.user = decoded;
+            next();
+        })
+    } catch (error) {
+        return res.status(400).json({msg: 'Error al validar token'})
+    }
+}
+
+module.exports = {login, resetPassword, user}

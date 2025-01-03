@@ -33,7 +33,7 @@ const getMarcas = async (req= request, res= response) => {
 
         res.json({
             msg: 'Marcas obtenidas con éxito',
-            data: result, 
+            data: result.slice(0, result.length -1),
             total: total,
             limit: limitNumber,
             currentPage: pageNumber,
@@ -49,12 +49,29 @@ const getMarcas = async (req= request, res= response) => {
     }
 }
 
-const getMarca = (req= request, res= response) => {
+const getMarca = async (req= request, res= response) => {
     const { id } = req.params;
-    res.json({
-        msg: 'marcas obtenidas',
-        id
-    })
+    try {
+        const result = await dbConnect.query(
+            `EXEC MarcaBuscarId @id = ?`,
+            {
+                replacements: [id],
+                type: dbConnect.QueryTypes.SELECT
+            }
+        );
+
+        if (result && result.length === 0) {
+            return null;  
+        }
+
+        res.json({
+            msg: 'get marca',
+            data: result[0]
+        })
+    } catch (error) {
+        console.error('Error al obtener la marca:', error);
+        return null;  // En caso de error, retornamos null
+    }
 }
 
 const validarMarca = [
@@ -80,7 +97,7 @@ const postMarcas = async (req, res= response) => {
         );
         res.status(201).json({
             msg: 'Marca creada correctamente',
-            data: result
+            data: result[0]
         })
         
     } catch (error) {
@@ -107,7 +124,7 @@ const putMarcas = async (req, res= response) => {
 
         res.status(201).json({
             msg: 'marca actualizada correctamente',
-            data: result
+            data: result[0]
         })
         
     } catch (error) {

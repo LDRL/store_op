@@ -35,7 +35,7 @@ const getCategorias = async (req= request, res= response) => {
 
         res.json({
             msg: 'Categorias obtenidos con éxito',
-            data: result,
+            data: result.slice(0, result.length -1),
             total: total,
             limit: limitNumber,
             currentPage: pageNumber,
@@ -51,12 +51,29 @@ const getCategorias = async (req= request, res= response) => {
     }
 }
 
-const getCategoria = (req= request, res= response) => {
+const getCategoria = async (req= request, res= response) => {
     const { id } = req.params;
-    res.json({
-        msg: 'getUsuario',
-        id
-    })
+    try {
+        const result = await dbConnect.query(
+            `EXEC CategoriaProductoBuscarId @id = ?`,
+            {
+                replacements: [id],
+                type: dbConnect.QueryTypes.SELECT
+            }
+        );
+
+        if (result && result.length === 0) {
+            return null;  
+        }
+
+        res.json({
+            msg: 'get categoria',
+            data: result[0]
+        })
+    } catch (error) {
+        console.error('Error al obtener la categoria:', error);
+        return null;  // En caso de error, retornamos null
+    }
 }
 
 
@@ -85,7 +102,7 @@ const postCategoria = async (req, res= response) => {
         );
         res.status(201).json({
             msg: 'Categoría creada correctamente',
-            data: result
+            data: result[0]
         })
         
     } catch (error) {
@@ -112,7 +129,7 @@ const putCategoria = async (req, res= response) => {
 
         res.status(201).json({
             msg: 'Categoría actualizada correctamente',
-            data: result
+            data: result[0]
         })
         
     } catch (error) {

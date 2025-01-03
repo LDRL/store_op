@@ -37,7 +37,7 @@ const usuariosGet = async (req= request, res= response) => {
 
         res.json({
             msg: 'Usuarios obtenidos con éxito',
-            data: result, 
+            data: result.slice(0, result.length -1), 
             total: total,
             limit: limitNumber,
             currentPage: pageNumber,
