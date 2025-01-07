@@ -1,10 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import axios, { AxiosRequestConfig } from 'axios';
 import { ProductAdapter, ProductListAdapter } from "../adapter";
-import { Product, ProductList, ApiProduct,Total } from "../models";
+import { Product, ProductList, ApiProduct } from "../models";
 import { useProductContext } from '@/context';
 import { useEffect, useState } from 'react';
 import { pageSize, PaginationModel } from '@/utils';
+import clientAxios from '@/config/clientAxios';
 
 export const productUrl = 'http://localhost:8080/api/productos/';
 
@@ -59,7 +59,7 @@ export const useFetchProduct = (productId: string) => {
     return useQuery<Product, Error>({
         queryKey: ['product', productId], // Clave de consulta
         queryFn: async () => {
-            const response = await axios.get<{ producto: ApiProduct }>(`${productUrl}${productId}/`);
+            const response = await clientAxios.get<{ producto: ApiProduct }>(`${productUrl}${productId}/`);
 
             if (response.status !== 200) {
                 throw new Error('Error al cargar el producto');
@@ -84,11 +84,10 @@ export const useCreateProduct = () => {
                 nombre: newProduct.name,
                 idcategoria: newProduct.idCategory,
                 idmarca: newProduct.idBrand,
-                idpresentacion: newProduct.idPresentation,
-                descripcion: newProduct.description,
+                
             };
 
-            const response = await axios.post<{ message: string, producto: ApiProduct }>(productUrl, product);
+            const response = await clientAxios.post<{ message: string, producto: ApiProduct }>(productUrl, product);
 
             if (response.status !== 201) {
                 throw new Error('Error al crear el producto');
@@ -116,11 +115,9 @@ export const useUpdateProduct = () => {
                 nombre: updatedProduct.name,
                 idcategoria: updatedProduct.idCategory,
                 idmarca: updatedProduct.idBrand,
-                idpresentacion: updatedProduct.idPresentation,
-                descripcion: updatedProduct.description,
             };
 
-            const response = await axios.put<{ message: string, data: ApiProduct }>(`${productUrl}${updatedProduct.productCode}/`, product);
+            const response = await clientAxios.put<{ message: string, data: ApiProduct }>(`${productUrl}${updatedProduct.id}/`, product);
 
             if (response.status !== 200) {
                 throw new Error('Error al actualizar el producto');
@@ -141,7 +138,7 @@ export const useFetchProducts = (page: number = 1, search: string) => {
     return useQuery<ApiResponse, Error>({
         queryKey: ['products', page, search],
         queryFn: async () => {
-            const response = await axios.get<ApiResponse>(`${productUrl}?page=${page}&search=${search}`);
+            const response = await clientAxios.get<ApiResponse>(`${productUrl}?page=${page}&search=${search}`);
             return response.data;
             
         },

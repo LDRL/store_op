@@ -2,7 +2,7 @@
 import { Controller, Control } from "react-hook-form";
 import TextField from "@mui/material/TextField";
 import React from 'react';
-import { FormControl, FormHelperText, InputLabel, MenuItem, Select } from "@mui/material";
+import { Box, Button, FormControl, FormHelperText, InputLabel, MenuItem, Select } from "@mui/material";
 
 
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -252,3 +252,66 @@ export const FormInputNumber = ({ name, control, label, rules, externalOnChange 
         />
     );
 };
+
+
+interface FormImageProps {
+    name: string;
+    control: Control<any>;
+    label: string;
+    rules?: any;
+    externalOnChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+}
+export const FormInputImage = ({ name, control, label, rules, externalOnChange }: FormImageProps) => {
+    return (
+        <Controller
+          name={name}
+          control={control}
+          rules={{
+            required: 'La imagen es obligatoria',
+            validate: (value) => {
+                // Si el valor es un FileList, comprobar que tenga al menos un archivo
+                if (value instanceof FileList) {
+                  return value.length > 0 || 'Debe seleccionar una imagen';
+                }
+              
+                // Si el valor es un File (únicamente un archivo), comprobar que exista
+                if (value instanceof File) {
+                  return true; // Si el archivo está presente, la validación pasa
+                }
+              
+                // Si no es ni FileList ni File, la validación falla
+                return 'Debe seleccionar una imagen';
+              }
+          }}
+          render={({
+            field,
+            fieldState : {error}
+        }) => (
+          
+            <Box sx={{ marginBottom: 2 }}>
+              {/* Botón para seleccionar archivo */}
+              <Button variant="contained" component="label">
+                Seleccionar Imagen
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  onChange={(e) => {
+                    externalOnChange?.(e);
+                    const file = e.target.files?.[0]; 
+                    if (file) {
+                        console.log("file ---")
+                      field.onChange(file); // Enviar el archivo como un solo File
+                    }
+                    // field.onChange(e.target.files);
+                  }}
+                />
+              </Button>
+
+              {/* Mostrar el error si existe */}
+              {error && ( <FormHelperText sx={{color: 'red'}}>{error.message}</FormHelperText> )}
+            </Box>
+          )}
+        />
+    )
+}

@@ -193,6 +193,7 @@ export default function SideBar() {
       
       </Drawer>
       <Box component="main" sx={{ flexGrow: 1, paddingTop: 7, paddingX:3  }}>
+      {/* sx={{ flexGrow: 1, paddingTop: 7, paddingX:3  }} */}
         <Outlet />
       </Box>
     </Box>

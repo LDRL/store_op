@@ -1,3 +1,4 @@
+import clientAxios from '@/config/clientAxios';
 import {useQuery} from '@tanstack/react-query'
 
 interface Option{
@@ -6,22 +7,18 @@ interface Option{
 }
 
 interface Categoria {
-    _id: number;
+    id_categoria_producto: number;
     nombre: string;
     estado: string | null;
 }
 
 interface Marca {
-    _id: number;
+    id_marca: number;
     nombre: string;
     estado: string | null;
 }
 
-interface Presentacion {
-    _id: number;
-    nombre: string;
-    estado: string | null;
-}
+
 
 interface ApiResponse {
     msg: string;
@@ -30,13 +27,10 @@ interface ApiResponse {
 
 interface ApiMarcaResponse{
     msg: string;
-    marcas: Marca[];
+    data: Marca[];
 }
 
-interface ApiPresentacionResponse{
-    msg: string;
-    presentacion: Presentacion[];
-}
+
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -44,12 +38,16 @@ export const useFetchOptions = () => {
     return useQuery<Option[], Error>({
         queryKey: ['dropdownOptions'], // Se maneja como un objeto dentro de useQueryOptions para el uso de TypeScript 
         queryFn: async() => { // queryFn especifica la funcion para el consumo de la api
-            const response = await fetch(apiUrl+"categorias/");
-            if(!response.ok){
-                throw new Error('Errr al cargar las opciones')
+            // const response = await fetch(apiUrl+"categorias/");
+            const response = await clientAxios.get(`${apiUrl}categorias`);
+
+            if(response.status !== 200){
+                throw new Error('Error al cargar las opciones')
             }
 
-            const data: ApiResponse = await response.json();
+            console.log(response.data)
+            const data: ApiResponse = await response.data;
+            console.log(data, "-data")
             return categoriasAdapter(data.data);
         }
     });
@@ -57,7 +55,7 @@ export const useFetchOptions = () => {
 
 const categoriasAdapter = (categorias: Categoria[]): Option[] => {
     return categorias.map(categoria => ({
-        value: categoria._id,
+        value: categoria.id_categoria_producto,
         label: categoria.nombre,
     }));
 };
@@ -66,43 +64,20 @@ export const useFetchMarcaOptions = () => {
     return useQuery<Option[], Error>({
         queryKey: ['dropdownMarca'], // Se maneja como un objeto dentro de useQueryOptions para el uso de TypeScript 
         queryFn: async() => { // queryFn especifica la funcion para el consumo de la api
-            const response = await fetch(apiUrl+"marcas/");
-            if(!response.ok){
+            const response = await clientAxios.get(`${apiUrl}marcas`);
+            if(response.status !== 200){
                 throw new Error('Errr al cargar las opciones')
             }
 
-            const data: ApiMarcaResponse = await response.json();
-            return MarcasAdapter(data.marcas);
+            const data: ApiMarcaResponse = await response.data;
+            return MarcasAdapter(data.data);
         }
     });
 };
 
 const MarcasAdapter = (marcas: Marca[]): Option[] => {
     return marcas.map(marca => ({
-        value: marca._id,
+        value: marca.id_marca,
         label: marca.nombre,
-    }));
-};
-
-export const useFetchPresentacionOptions = () => {
-    return useQuery<Option[], Error>({
-        queryKey: ['dropdownPresentacion'], // Se maneja como un objeto dentro de useQueryOptions para el uso de TypeScript 
-        queryFn: async() => { // queryFn especifica la funcion para el consumo de la api
-            const response = await fetch(apiUrl+"presentaciones/");
-
-            if(!response.ok){
-                throw new Error('Errr al cargar las opciones')
-            }
-
-            const data: ApiPresentacionResponse = await response.json();
-            return PresentacionesAdapter(data.presentacion);
-        }
-    });
-};
-
-const PresentacionesAdapter = (presentaciones: Presentacion[]): Option[] => {
-    return presentaciones.map(presentacion => ({
-        value: presentacion._id,
-        label: presentacion.nombre,
     }));
 };

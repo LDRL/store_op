@@ -43,6 +43,7 @@ export const CustomDialog = ({ children }: Props) => {
             onClose={() => handleExit()}
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
+            maxWidth="lg"
             fullWidth
         >
             {children}

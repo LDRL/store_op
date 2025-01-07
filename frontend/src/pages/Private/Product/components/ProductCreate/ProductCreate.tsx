@@ -1,12 +1,12 @@
 import React, { CSSProperties, useEffect, useState } from 'react';
-import { Box, Button} from '@mui/material';
+import { Box, Button, Typography} from '@mui/material';
 
 import { useForm } from 'react-hook-form';
 import { Product } from '../../models';
 
 
 import { fetchProductCreate, fetchProductUpdate, fetchProduct, productUrl } from '../../services/product';
-import { useFetchMarcaOptions, useFetchOptions, useFetchPresentacionOptions } from '../../hooks/useFetchOptions';
+import { useFetchMarcaOptions, useFetchOptions } from '../../hooks/useFetchOptions';
 
 import "./ProductCreate.css"
 import { ClipLoader } from 'react-spinners';
@@ -15,7 +15,7 @@ import { useProductContext } from '@/context';
 import { PrivateRoutes } from '@/utils/routes';
 import CardForm from '@/componets/Cards/CardForm';
 import LoadMask from '@/componets/LoadMask/LoadMask';
-import { FormDropdown, FormInputText, FormTextArea } from '@/componets';
+import { FormDropdown, FormInputImage, FormInputNumber, FormInputText, FormTextArea } from '@/componets';
 
 
 const override: CSSProperties = {
@@ -39,7 +39,9 @@ const CreateProduct: React.FC = () => {
 
   const {data: options, isLoading, isError} = useFetchOptions();
   const {data: marcaOptions, isLoading: isMarcaLoading, isError: isMarcaError} = useFetchMarcaOptions();
-  const {data: presentacionOptions, isLoading: isPresentacionLoading, isError: isPresentacionError} = useFetchPresentacionOptions();
+
+  const [image, setImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   
   useEffect(() => {
     const fetchProductData = async () => {
@@ -49,12 +51,10 @@ const CreateProduct: React.FC = () => {
           const productId = productUrl + id
           const [err, responseData] = await fetchProduct(productId);
           if (err) {
-            // Manejo de errores si es necesario
             console.error("Error fetching product:", err);
             return;
           }
 
-          // Abre el modal con los datos del producto
           if (responseData) {
             editProduct(responseData);
           } else {
@@ -81,6 +81,7 @@ const CreateProduct: React.FC = () => {
 
 
   const onSubmit = async (data: Product) => {
+    console.log(data, "-data")
     setLoading(true);
     try {
       // let responseData;
@@ -102,24 +103,29 @@ const CreateProduct: React.FC = () => {
     }
   };
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    console.log(file, "file")
+    console.log(event, "event ---")
+    if (file) {
+      setImage(file);
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+    }
+  };
+
+
   if (isLoading){
     return <p>Cargando opciones ....</p>
   }
   if(isError){
-    return <p>Error al cargar las opciones, {isError}</p>
+    return <p>Error al cargar las opciones.., {isError}</p>
   }
 
   if (isMarcaLoading){
     return <p>Cargando opciones ....</p>
   }
   if(isMarcaError){
-    return <p>Error al cargar las opciones</p>
-  }
-
-  if (isPresentacionLoading){
-    return <p>Cargando opciones ....</p>
-  }
-  if(isPresentacionError){
     return <p>Error al cargar las opciones</p>
   }
 
@@ -152,11 +158,34 @@ const CreateProduct: React.FC = () => {
         >
           <div className='section'>
             <FormInputText
-                name="name"
-                control={control}
-                label="Nombre producto"
-                rules={{ required: 'Product name is required' }}
-              />
+              name="name"
+              control={control}
+              label="Nombre producto"
+              rules={{ required: 'Nombre de producto es requerido' }}
+            />
+          </div>
+
+          <div className='container_selector'>
+            <FormInputText
+              name="code"
+              control={control}
+              label="Código de producto"
+              rules={{ required: 'Código de producto es requerido' }}
+            />
+
+            <FormInputNumber
+              name="stock"
+              control={control}
+              label="Stock"
+              rules={{ required: 'Stock de producto es requerido' }}
+            />
+
+            <FormInputNumber
+              name="price"
+              control={control}
+              label="Precio"
+              rules={{ required: 'Precio de producto es requerido' }}
+            />
           </div>
 
           <div className='container_selector'>
@@ -176,25 +205,24 @@ const CreateProduct: React.FC = () => {
                 options={marcaOptions || []}
               />         
 
-              <FormDropdown
-                name="idPresentation"
-                control={control}
-                label="presentacion"
-                rules={{ required: 'presentación es un campo requerido' }}
-                options={presentacionOptions || []}
-              /> 
           </div>
 
           <div className='section'>
-            <FormTextArea
-              name="description"
+            <FormInputImage 
+              name='image'
+              label='imagen del producto'
               control={control}
-              label="Descripción"
-              rules={{required: 'Descripción es un campo requerido'}}
-              rows={6}
-              placeholder="Escribe algo aquí..."
-              helperText="Máximo 500 caracteres"
-              />
+              externalOnChange={handleFileChange}
+            />
+
+            {imagePreview && (
+              <Box>
+                <Typography variant="body1">Vista previa:</Typography>
+                <img src={imagePreview} alt="Vista previa" width={200} />
+              </Box>
+            )}
+
+
             </div>
             <div className='container_button'>
               <Button
@@ -209,6 +237,7 @@ const CreateProduct: React.FC = () => {
                 type="button"
                 sx={{ mt: 2 }}
                 color='error'
+                onClick={() => navigate('/private/product')}
               >
                 Cancelar
               </Button>

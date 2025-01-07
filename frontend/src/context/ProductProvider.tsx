@@ -14,6 +14,16 @@ const EmptySidebarState: SidebarInfo = {
     state: false
 }
 
+interface ProductCard {
+    id: number;
+    name: string;
+    price: number;
+    stock: number;
+    photo_url: string;
+    cantidad: number;
+    sub_total: number;
+}
+
 export const sidebarKey = 'sidebar'
 
 interface ContextProps {
@@ -35,8 +45,11 @@ interface ContextProps {
     editProduct: (category: Product | null) => void;
     clearProduct: () => void;
     setSearchProduct: (search: string) => void;
-}
 
+    count: number;
+    cartProducts: ProductCard[];    // Tipo correcto
+    setCartProducts: React.Dispatch<React.SetStateAction<ProductCard[]>>;
+}
 
 
 
@@ -60,14 +73,50 @@ const ProductProvider = ({children}: ProviderProps) => {
         return saveState ? JSON.parse(saveState): EmptySidebarState;
     });
 
+
+
     const [categoryState, setCategoryState] = useState<CategoryState>(EmptyCategoryState);
     const [brandState, setBrandState] = useState<BrandState>(EmptyBrandState);
     const [productState, setProductState] = useState<ProductState>(EmptyProductState);
+
+    const [count, setCount] = useState(0);
+
+ 
+
+    const [cartProducts, setCartProducts] = useState<ProductCard[]>(()=>{
+        const saveState = localStorage.getItem('cartProducts');
+        return saveState ? JSON.parse(saveState): [];
+    });
+
+    // Shooping cart - Order
+    const [order, setOrder] = useState([]);
 
 
     useEffect(() => {
         persistLocalStorage<SidebarInfo>(sidebarKey, sidebarState);
     },[sidebarState])
+
+
+    useEffect(() => {
+        setCount(cartProducts.length); // Actualiza el contador cuando cambian los productos en el carrito
+    }, [cartProducts]);
+
+
+    // useEffect(() => {
+    //     const savedProducts = localStorage.getItem('cartProducts');
+    //     console.log(savedProducts, "---");
+    //     if (savedProducts) {
+    //         const parsedProducts = JSON.parse(savedProducts);
+    //         setCartProducts(parsedProducts);
+    //     }
+    // }, []);
+
+    useEffect(() => {
+        console.log(cartProducts, "---")
+        localStorage.setItem('cartProducts', JSON.stringify(cartProducts));
+    }, [cartProducts]);
+
+   
 
     const createSidebar = (sidebarInfo: SidebarInfo)=>{
         setSidebarState(sidebarInfo);  
@@ -151,7 +200,8 @@ const ProductProvider = ({children}: ProviderProps) => {
         <ProductContext.Provider value={{ sidebarState, createSidebar, updateSidebar, resetSidebar,
             categoryState,editCategory,clearCategory,setSearchCategory,
             brandState,editBrand,clearBrand,setSearchBrand,
-            productState, editProduct, clearProduct, setSearchProduct
+            productState, editProduct, clearProduct, setSearchProduct,
+            count, cartProducts, setCartProducts,
         }}>
             {children}
         </ProductContext.Provider>

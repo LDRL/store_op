@@ -34,39 +34,59 @@ const ListOfProducts: React.FC = () => {
         {
             field: 'id',
             headerName: 'Id',
+            sortable:false,
             flex: 1,
             minWidth: 150,
+            disableColumnMenu: true,
+            renderCell: (params: GridRenderCellParams) => <>{params.value}</>,
+        },
+        {
+            field: 'code',
+            headerName: 'Codigo',
+            sortable:false,
+            flex: 1,
+            minWidth: 150,
+            disableColumnMenu: true,
             renderCell: (params: GridRenderCellParams) => <>{params.value}</>,
         },
         {
             field: 'name',
             headerName: 'Producto',
+            sortable:false,
             flex: 1,
+            disableColumnMenu: true,
             renderCell: (params: GridRenderCellParams) => <>{params.value}</>,
         },
         {
             field: 'price',
             headerName: 'Precio',
+            sortable:false,
             flex: 1,
+            disableColumnMenu: true,
             renderCell: (params: GridRenderCellParams) => <>{params.value}</>,
+        },
+        {
+            field: 'stock',
+            headerName: 'Stock',
+            sortable:false,
+            flex: 1,
+            disableColumnMenu: true,
+            renderCell: (params: GridRenderCellParams) => <>{params.value }</>,
         },
         {
             field: 'brand',
             headerName: 'Marca',
+            sortable:false,
             flex: 1,
-            // renderCell: (params: GridRenderCellParams) => <>{params.value}</>,
+            disableColumnMenu: true,
             renderCell: (params: GridRenderCellParams) => <>{params.value}</>,
-        },
-        {
-            field: 'presentation',
-            headerName: 'Presentacion',
-            flex: 1,
-            renderCell: (params: GridRenderCellParams) => <>{params.value ? params.value.name : 'Sin Presentacion'}</>,
         },
         {
             field: 'category',
             headerName: 'Categoria',
+            sortable:false,
             flex: 1,
+            disableColumnMenu: true,
             renderCell: (params: GridRenderCellParams) => <>{params.value}</>,
         },
         {
@@ -81,7 +101,7 @@ const ListOfProducts: React.FC = () => {
                     color="success"
                     onClick={() => handleEditProduct(params.row as Product)}
                 >
-                    Edit
+                    Editar
                 </Button>
             ),
         },

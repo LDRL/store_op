@@ -24,8 +24,6 @@ const ListOfCategories: React.FC = () => {
         handlePaginationModelChange,
     } = useCategory();
 
-    console.log(categories, "------- categories");
-
     const handleEditCategory = (category: Category) => {
         editCategory(category);
         navigate(`${category.id}/editar`);
@@ -35,8 +33,10 @@ const ListOfCategories: React.FC = () => {
         {
             field: 'id',
             headerName: 'Codigo',
+            sortable:false,
             flex: 1,
             minWidth: 150,
+            disableColumnMenu: true,
             renderCell: (params: GridRenderCellParams) => (
                 <div style={{ display: isMobile ? 'block' : 'inline' }}>{params.value}</div>
             ),
@@ -44,7 +44,9 @@ const ListOfCategories: React.FC = () => {
         {
             field: 'name',
             headerName: 'Producto',
+            sortable:false,
             flex: 1,
+            disableColumnMenu: true,
             renderCell: (params: GridRenderCellParams) => (
                 <div style={{ display: isMobile ? 'block' : 'inline' }}>{params.value}</div>
             ),

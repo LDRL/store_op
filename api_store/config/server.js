@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require('cors');
+const path = require('path');
 const {dbConnnectonMySql} = require("./db/connection");
 const { corsConfig } = require("./cors");
 // const db = require("../models/mysql");
@@ -35,11 +36,13 @@ class Server {
 
     middlewares() {
         //cors
-        this.app.use( cors(corsConfig) )
+        // this.app.use( cors(corsConfig) )
+        this.app.use( cors('*') )
 
         this.app.use(express.json());  
         this.app.use(express.urlencoded({ extended: true }));
     
+        this.app.use('/uploads', express.static(path.join(__dirname, '../uploads')))
 
         //Direccion publica
         this.app.use( express.static('public') )

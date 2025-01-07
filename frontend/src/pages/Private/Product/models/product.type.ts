@@ -12,6 +12,7 @@ export interface ApiProduct {
     foto: string;
     id_estado: number;
     estado: string;
+    image?: File;
 
     // updatedAt: Date
     //Datos para guardar catalgos
@@ -30,6 +31,7 @@ export interface Product {
     photo_url: string;
     idState: number;
     state: string
+    image?: File;
 }
 
 
@@ -47,7 +49,7 @@ export const ProductEmptyState: Product = {
     idCategory: 0,
     photo_url: '',
     idState: 0,
-    state: ''   
+    state: ''
 }
 
 export type ProductList = Array<Product>
@@ -63,7 +65,7 @@ export type Data = Array<Record<string, string>>
 
 export type ApiResponse = {
     message: string,
-    producto: ProductList,
+    data: ProductList,
     total: number
 }
 

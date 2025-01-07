@@ -6,6 +6,8 @@ import React, { lazy } from 'react'
 import { CategoryCreate } from './Category'
 import { BrandCreate } from './Brand'
 import { ProductCreate } from './Product'
+import { Checkout } from './Buy'
+
 
 
 const Dashboard = lazy(() => import('./Dashboard/Dashboard'))
@@ -13,8 +15,7 @@ const Category = lazy(()=> import('../Private/Category/Category'))
 const Brand = lazy(() => import('../Private/Brand/Brand'))
 const Product = lazy(()=> import('../Private/Product/Product'))
 
-
-
+const Buy = lazy(() => import('../Private/Buy/Buy'))
 
 
 function Private() {
@@ -36,7 +37,11 @@ function Private() {
         <Route path = {PrivateRoutes.PRODUCT_CREATE} element={<ProductCreate />} />
         <Route path = {PrivateRoutes.PRODUCT_EDIT} element={<ProductCreate />} />
       
+        {/* Buy */}
 
+        <Route path = {PrivateRoutes.BUY} element={<Buy />} />
+        <Route path = {PrivateRoutes.BUY_CHECKOUT} element={<Checkout />} />
+        
     </RoutersWitNotFound>
     
   )

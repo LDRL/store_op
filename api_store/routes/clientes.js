@@ -1,6 +1,6 @@
 const { Router } = require('express')
 const { authenticate } = require('../middleware/auth')
-const { getCliente, Getclientes, postCliente, putCliente, deleteCliente } = require('../controllers/cliente')
+const { getCliente, Getclientes, postCliente, putCliente, deleteCliente,GetclienteCheckOut } = require('../controllers/cliente')
 const { handleInputErrors } = require('../middleware/validacion')
 const { body } = require('express-validator')
 
@@ -10,6 +10,8 @@ router.use(authenticate)
 
 
 router.get('/', Getclientes )
+router.get('/checkout', GetclienteCheckOut )
+
 router.get('/:id', getCliente )
 router.post('/',
     body('razon_social').notEmpty().withMessage('razon social no puede ir vacio'),
@@ -37,6 +39,7 @@ router.put('/:id',
     body('fecha_nacimiento').notEmpty().withMessage('razon social no puede ir vacio'), 
     putCliente )
 router.delete('/:id', deleteCliente )
+
 
 
 module.exports = router

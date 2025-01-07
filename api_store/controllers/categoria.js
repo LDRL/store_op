@@ -5,19 +5,21 @@ const { body, validationResult } = require('express-validator');
 
 
 const getCategorias = async (req= request, res= response) => {
-    const { page = 1, limite = 10, search = '' } = req.query;
+    const { page = '', limite = 10, search = '' } = req.query;
 
 
-    const pageNumber = parseInt(page);
-    const limitNumber = parseInt(limite);
+    // const pageNumber = parseInt(page);
+    const pageNumber = page ? parseInt(page, 10) : 0;
 
-    if (isNaN(pageNumber) || pageNumber < 1) {
-        return res.status(400).json({ msg: 'Página inválida' });
-    }
+    const limitNumber = page ? parseInt(limite) : 0;
 
-    if (isNaN(limitNumber) || limitNumber < 1) {
-        return res.status(400).json({ msg: 'Límite inválido' });
-    }
+    // if (isNaN(pageNumber) || pageNumber < 1) {
+    //     return res.status(400).json({ msg: 'Página inválida' });
+    // }
+
+    // if (isNaN(limitNumber) || limitNumber < 1) {
+    //     return res.status(400).json({ msg: 'Límite inválido' });
+    // }
 
     try {
         const result = await dbConnect.query(
@@ -35,7 +37,7 @@ const getCategorias = async (req= request, res= response) => {
 
         res.json({
             msg: 'Categorias obtenidos con éxito',
-            data: result.slice(0, result.length -1),
+            data: page? result.slice(0, result.length -1) : result,
             total: total,
             limit: limitNumber,
             currentPage: pageNumber,

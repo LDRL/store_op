@@ -2,6 +2,7 @@ import axios, {AxiosRequestConfig, AxiosResponse} from "axios";
 
 import { ProductAdapter, ProductListAdapter } from "../adapter";
 import { Product, ProductList, Total, ApiProduct } from "../models";
+import clientAxios from "@/config/clientAxios";
 
 export const productUrl = 'http://localhost:8080/api/productos/';
 
@@ -49,30 +50,42 @@ export const fetchProduct = async (url: string): Promise<[Error?, Product?]> => 
 
 
 // CREATE
-export const fetchProductCreate = async (url: string, productoN: Product):  Promise<[Error?, Product?]> => {
+export const fetchProductCreate = async (url: string, productoN: Product): Promise<[Error?, Product?]> => {
     try {
-        const product: Omit<ApiProduct, "_id" | "codigoprod"| "precio" | "Marca" | "Categoria" | "Presentacion" > ={
-            nombre:productoN.name,
-            idcategoria: productoN.idCategory,
-            idmarca: productoN.idBrand,
-            idpresentacion: productoN.idPresentation,
-            descripcion: productoN.description
-        }
-        const response: AxiosResponse<{message: string, producto: ApiProduct}> = await axios.post(url, product);
-        const {producto} = response.data
-        
-        return [undefined, ProductAdapter(producto)]
-
+      const formData = new FormData();
+      formData.append('nombre', productoN.name);
+      formData.append('id_categoria_producto', productoN.idCategory.toString());
+      formData.append('id_marca', productoN.idBrand.toString());
+      formData.append('codigo', productoN.code.toString());
+      formData.append('precio', productoN.price.toString());
+      formData.append('stock', productoN.stock.toString());
+  
+      // Si la imagen existe, la añadimos al FormData
+      if (productoN.image) {
+        formData.append('image', productoN.image);
+      }
+      
+      const response: AxiosResponse<{ message: string, data: ApiProduct }> = await clientAxios.post(url, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',  // Necesario para enviar archivos
+        },
+      });
+  
+      const { data } = response.data;
+      
+      return [undefined, ProductAdapter(data)];
+  
     } catch (error) {
-        if (axios.isAxiosError(error) && error.response) {
-            // Server responded with a status other than 2xx
-            throw new Error(`Error creating product: ${error.response.data}`);
-        } else {
-            // Something happened in setting up the request that triggered an Error
-            throw new Error(`Error creating product: ${error}`);
-        }
+      if (axios.isAxiosError(error) && error.response) {
+        // Server responded with a status other than 2xx
+        throw new Error(`Error creating product: ${error.response.data}`);
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        throw new Error(`Error creating product: ${error}`);
+      }
     }
-};
+  };
+  
 
 ////////UPDATE
 export const fetchProductUpdate = async (url: string, productU: Product):  Promise<[Error?, Product?]> => {

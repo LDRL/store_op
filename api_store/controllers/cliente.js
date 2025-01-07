@@ -166,4 +166,36 @@ const deleteCliente = async (req, res= response) => {
     }
 }
 
-module.exports = {Getclientes, getCliente, postCliente, putCliente, deleteCliente}
+
+
+const GetclienteCheckOut = async (req= request, res= response) => {
+    console.log(req.user, "---")
+
+    const { id_cliente } = req.user;
+
+    console.log(id_cliente, "---")
+    try {
+        const result = await dbConnect.query(
+            `EXEC ClienteBuscarId @id = ?`,
+            {
+                replacements: [id_cliente],
+                type: dbConnect.QueryTypes.SELECT
+            }
+        );
+
+        if (result && result.length === 0) {
+            return null;  
+        }
+
+        res.json({
+            msg: 'get cliente',
+            data: result[0]
+        })
+    } catch (error) {
+        console.error('Error al buscar el cliente:', error);
+        return null;  // En caso de error, retornamos null
+    }
+}
+
+
+module.exports = {Getclientes, getCliente, postCliente, putCliente, deleteCliente,GetclienteCheckOut}

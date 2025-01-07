@@ -1,5 +1,9 @@
 const { response, request } = require('express')
 const {dbConnect} = require('../config/db/connection');
+const sharp = require('sharp');
+const fs = require('fs');
+const path = require('path');
+
 // const sql = require('mssql');
 
 const getProductos = async (req= request, res= response) => {
@@ -26,8 +30,6 @@ const getProductos = async (req= request, res= response) => {
         );
 
         const total = result[result.length - 1]?.Total || 0; 
-
-
         const totalPages = Math.ceil(total / limitNumber);
 
         res.json({
@@ -56,22 +58,19 @@ const getProducto = (req= request, res= response) => {
     })
 }
 
-///
-
 const postProducto = async (req, res = response) => {
-    const { nombre, codigo, stock, precio, foto, id_usuario, id_categoria_producto, id_marca } = req.body;
+    const { nombre, codigo, stock, precio, foto, id_categoria_producto, id_marca } = req.body;
+    const id_usuario = req.user.id_usuario
 
     if (!req.file) {
         return res.status(400).json({ error: 'No se subió alguna imagen' });
     }
-
 
     const stockFloat = parseFloat(stock);  // Convertir stock a FLOAT
     const precioFloat = parseFloat(precio);  // Convertir precio a FLOAT
     const idUsuarioInt = parseInt(id_usuario);  // Convertir id_usuario a INT
     const idCategoriaInt = parseInt(id_categoria_producto);  // Convertir id_categoria_producto a INT
     const idMarcaInt = parseInt(id_marca);  // Convertir id_marca a INT
-
 
     if (isNaN(stockFloat) || isNaN(precioFloat) || isNaN(idUsuarioInt) || isNaN(idCategoriaInt) || isNaN(idMarcaInt)) {
         return res.status(400).json({
@@ -80,7 +79,21 @@ const postProducto = async (req, res = response) => {
     }
 
     try {
-        const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+        const ext = path.extname(req.file.path);
+        const nombreI = nombre.replace(/\s+/g, '');
+        const imageUrlI = path.resolve(`uploads/${codigo}-${nombreI}${ext}`);
+        const imageUrl = `${req.protocol}://${req.get('host')}/${imageUrlI}`;
+
+
+        await sharp(req.file.path)
+            .resize({ width: 500, height: 500, fit: sharp.fit.inside, withoutEnlargement: true })
+            .toFile(imageUrlI);
+
+        // Eliminar el archivo original de manera asíncrona
+        await fs.promises.unlink(req.file.path);
+
+
+        // fs.unlinkSync(req.file.path);
 
         const result = await dbConnect.query(
             `EXEC ProductoInsertar @P_NOMBRE = :nombre, 
@@ -101,14 +114,18 @@ const postProducto = async (req, res = response) => {
                     id_usuario: idUsuarioInt, 
                     id_categoria_producto: idCategoriaInt, 
                     id_marca: idMarcaInt
-                }
+                },
+                type: dbConnect.QueryTypes.SELECT
             }
         );
+        console.log(result, "result")
 
         res.status(201).json({
             msg: 'Producto creado correctamente',
-            data: result
+            data: result[0]
         });
+
+       
 
     } catch (error) {
         console.error('Error al insertar el producto:', error);
@@ -118,7 +135,6 @@ const postProducto = async (req, res = response) => {
         });
     }
 };
-
 
 
 const putProducto = (req, res= response) => {

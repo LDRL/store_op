@@ -15,10 +15,10 @@ const upload = multer({
     storage,
     limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
     fileFilter: (req, file, cb) => {
-        const fileTypes = /\.(jpeg|jpg|png)$/i; // Expresión regular para las extensiones de archivo
+        const fileTypes = /\.(jpeg|jpg|png|webp)$/i; // Expresión regular para las extensiones de archivo
 
         const extname = path.extname(file.originalname).toLowerCase();
-        const mimetype = file.mimetype.match(/^image\/(jpeg|png)$/i);
+        const mimetype = file.mimetype.match(/^image\/(jpeg|jpg|png|webp)$/i);
 
         if (mimetype && fileTypes.test(extname)) {
             return cb(null, true); // Si es un archivo válido, lo dejamos pasar

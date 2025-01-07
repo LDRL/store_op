@@ -36,8 +36,10 @@ const ListOfBrands: React.FC = () => {
         {
             field: 'id',
             headerName: 'Codigo',
+            sortable:false,
             flex: 1,
             minWidth: 150,
+            disableColumnMenu: true,
             renderCell: (params: GridRenderCellParams) => (
                 <div style={{ display: isMobile ? 'block' : 'inline' }}>{params.value}</div>
             ),
@@ -45,7 +47,9 @@ const ListOfBrands: React.FC = () => {
         {
             field: 'name',
             headerName: 'Producto',
+            sortable:false,
             flex: 1,
+            disableColumnMenu: true,
             renderCell: (params: GridRenderCellParams) => (
                 <div style={{ display: isMobile ? 'block' : 'inline' }}>{params.value}</div>
             ),
