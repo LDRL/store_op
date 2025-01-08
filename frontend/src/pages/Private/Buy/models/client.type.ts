@@ -4,7 +4,7 @@ export interface ApiClient {
     razon_social: string;
     nombre_comercial: string;
     direccion_entrega: string;
-    telefono: number;
+    telefono: string;
     email: string;
 }
 
@@ -13,7 +13,7 @@ export interface Client {
     razon: string;
     name: string;
     address: string;
-    phone: number;
+    phone: string;
     email: string;
 }
 
@@ -23,7 +23,7 @@ export const ClientEmptyState: Client = {
     razon: '',
     name: '',
     address: '',
-    phone: 0,
+    phone: '',
     email: '',
 }
 

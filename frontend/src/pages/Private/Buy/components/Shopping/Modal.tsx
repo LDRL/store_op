@@ -7,7 +7,7 @@ import ShoppingTable from '../ShoppingTable/ShoppingTable';
 import { useNavigate } from 'react-router-dom';
 
 const Modal: React.FC = () => {
-    const {count} = useProductContext();
+    const {count, total} = useProductContext();
     const navigate = useNavigate();
 
 
@@ -56,7 +56,7 @@ const Modal: React.FC = () => {
              ): (
                 <DialogContentText>
                <ShoppingTable />
-
+               <h3>Total: Q {total.toFixed(2)}</h3>
                <Box sx={{display: 'flex', flexDirection:"row", justifyContent:'space-between'}}>
                <Button
                         variant="contained"

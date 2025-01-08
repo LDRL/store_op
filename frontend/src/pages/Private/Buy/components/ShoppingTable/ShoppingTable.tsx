@@ -16,7 +16,7 @@ interface ProductCard {
     stock: number;
     photo_url: string;
     cantidad: number;
-    sub_total: number;
+    subtotal: number;
 }
 
 const ShoppingTable: React.FC<FavoriteTableInterface> = () => {
@@ -90,7 +90,7 @@ const {cartProducts} = useProductContext();
       renderCell: (params: GridRenderCellParams) => <>{params.value}</>
     },
     {
-      field: 'cantidad',
+      field: 'amount',
       headerName: 'Cantidad',
       flex: 1,
       renderCell: (params: GridRenderCellParams) => <>{params.value}</>
@@ -102,7 +102,7 @@ const {cartProducts} = useProductContext();
       renderCell: (params: GridRenderCellParams) => <>{params.value}</>
     },
     {
-        field: 'sub_total',
+        field: 'subtotal',
         headerName: 'total',
         flex: 1,
         renderCell: (params: GridRenderCellParams) => <>{params.value}</>

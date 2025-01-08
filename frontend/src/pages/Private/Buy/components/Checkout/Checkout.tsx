@@ -7,8 +7,12 @@ import { ClipLoader } from 'react-spinners';
 import CardForm from '@/componets/Cards/CardForm';
 import LoadMask from '@/componets/LoadMask/LoadMask';
 import { Box, Button } from '@mui/material';
-import { FormInputText } from '@/componets';
+import { FormDate, FormInputText } from '@/componets';
 import { useGetClient } from '../../hooks/useClient';
+import { Order, useCreateOrder } from '@/pages/Private/Order';
+import dayjs from 'dayjs';
+import { useProductContext } from '@/context';
+import { PrivateRoutes } from '@/utils/routes';
 
 const override: CSSProperties = {
   display: "block",
@@ -17,17 +21,20 @@ const override: CSSProperties = {
 };
 
 const Checkout: React.FC = () => {
-  
+  const {cartProducts, total, setCartProducts } = useProductContext();
   const [loading , setLoading] = useState<boolean>(false);
   const [subtitulo, setSubtitulo] = useState<string>("");
   const [color] = useState("#ffffff")
   const navigate = useNavigate();
 
+  const createOrderMutation = useCreateOrder();
+
+
   const {id} = useParams<{id: string}>(); 
   
 
-  const { control, handleSubmit, reset} = useForm<Client>({
-    defaultValues: { id: 0, name: '', razon:''},
+  const { control, handleSubmit, reset} = useForm<Order>({
+    defaultValues: { id: 0, name: '', address:'', phone:''},
   });
 
 
@@ -41,7 +48,6 @@ console.log(data)
     reset({
       id: data.id,   // Asumiendo que 'data' tiene un 'id'
       name: data.name, // Asumiendo que 'data' tiene un 'name'
-      razon: data.razon,
       address: data.address,
       phone: data.phone,
       email: data.email
@@ -52,14 +58,39 @@ console.log(data)
   // clearBrand()
  }, [data]);
 
+  const onSubmit = async (data: Order) => {
+    console.log(data, "-data---")
 
- 
+    if (data.deliveryDate) {
+      data.deliveryDate = dayjs(data.deliveryDate).toISOString();
+    }
+    data.totalOrder = total;
 
+    console.log(total, 'Total orden --')
 
-  const onSubmit = async (data: Client) => {
+    const newData:Order = {...data, detail: cartProducts}
+
+    console.log(newData, "new data")
+
     setLoading(true);
-    
+    try {      
+      await createOrderMutation.mutateAsync(newData);
+      localStorage.removeItem('cartProducts')
+      setCartProducts([]);
+      navigate(`/private/${PrivateRoutes.BUY}`, {replace:true})
+    } catch (error) {
+      console.log(error)
+    }
+    finally {
+      setLoading(false); // Desactiva el loader
+    }
+    console.log(newData);
   };
+
+
+   
+    // setLoading(true);
+    
 
   return (    
     <div className='container'>
@@ -88,18 +119,9 @@ console.log(data)
         >
           <div className='section'>
             <FormInputText
-              name="razon"
-              control={control}
-              label="razon social"
-              rules={{ required: 'campo requerido' }}
-            />
-          </div>
-
-          <div className='section'>
-            <FormInputText
               name="name"
               control={control}
-              label="nombre comercial"
+              label="Nombre"
               rules={{ required: 'campo requerido' }}
             />
           </div>
@@ -128,6 +150,15 @@ console.log(data)
               control={control}
               label="correo electronico"
               rules={{ required: 'campo requerido' }}
+            />
+          </div>
+
+          <div className='section'>
+            <FormDate
+              name="deliveryDate"
+              control={control}
+              label='Fecha'
+              rules={{required: 'Fecha es un campo requerido'}}
             />
           </div>
 

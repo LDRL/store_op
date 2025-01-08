@@ -11,7 +11,8 @@ const userSchema = authSchema.pick({
     nombre: true,
     correo_electronico: true
 }).extend({
-    id_usuario: z.number()
+    id_usuario: z.number(),
+    id_rol: z.number()
 })
 
 export async function getUser() {
@@ -19,6 +20,7 @@ export async function getUser() {
         const { data } = await clientAxios('auth/user')
         const response = userSchema.safeParse(data)
         if(response.success) {
+            
             return response.data
         }
     } catch (error) {

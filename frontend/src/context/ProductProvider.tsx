@@ -1,10 +1,12 @@
-import { useState, useEffect, createContext, ReactNode, useReducer, useContext } from "react";
+import { useState, useEffect, createContext, ReactNode, useContext } from "react";
 import { clearLocalStorage, persistLocalStorage } from "../utils/localStorage.utility";
 import { Category, CategoryState, EmptyCategoryState } from '@/pages/Private/Category';
 import { Brand, BrandState, EmptyBrandState } from "@/pages/Private/Brand";
-// import { editCategory, clearCategory } from '@/redux/categorySlice';
 import { EmptyProductState, Product, ProductState } from '@/pages/Private/Product';
-
+import { Order } from "@/pages/Private/Order";
+import { EmptyOrderState, OrderState, Order as COrder } from "@/pages/Private/ClientOrder";
+import { Client, ClientState, EmptyClientState } from "@/pages/Private/Client";
+import { EmptyUserState, User, UserState } from "@/pages/Private/User";
 
 interface SidebarInfo{
     state: boolean
@@ -20,8 +22,8 @@ interface ProductCard {
     price: number;
     stock: number;
     photo_url: string;
-    cantidad: number;
-    sub_total: number;
+    amount: number;
+    subtotal: number;
 }
 
 export const sidebarKey = 'sidebar'
@@ -46,12 +48,33 @@ interface ContextProps {
     clearProduct: () => void;
     setSearchProduct: (search: string) => void;
 
+    // shoping card
     count: number;
-    cartProducts: ProductCard[];    // Tipo correcto
+    cartProducts: ProductCard[];
     setCartProducts: React.Dispatch<React.SetStateAction<ProductCard[]>>;
+
+    total: number;
+    setTotal: React.Dispatch<React.SetStateAction<number>>;
+
+    //client orders
+
+    cOrderState: OrderState;
+    showCOrder: (detail: COrder | null) => void;
+    clearCOrder: () => void;
+    setSearchCOrder: (search: string) => void;
+
+    // Client
+    clientState: ClientState;
+    editClient: (client: Client | null) => void;
+    clearClient: () => void;
+    setSearchClient: (search: string) => void;
+
+    // User
+    userState: UserState;
+    editUser: (client: User | null) => void;
+    clearUser: () => void;
+    setSearchUser: (search: string) => void;
 }
-
-
 
 // const ProductContext = createContext<ContextType>({
 //     sidebarState: EmptySidebarState,
@@ -78,14 +101,28 @@ const ProductProvider = ({children}: ProviderProps) => {
     const [categoryState, setCategoryState] = useState<CategoryState>(EmptyCategoryState);
     const [brandState, setBrandState] = useState<BrandState>(EmptyBrandState);
     const [productState, setProductState] = useState<ProductState>(EmptyProductState);
+    const [clientState, setClientState] = useState<ClientState>(EmptyClientState);
+    const [userState, setUserState] = useState<UserState>(EmptyUserState);
+
+
 
     const [count, setCount] = useState(0);
+    const [total, setTotal] = useState<number>(0);
+
+    const [cOrderState, setCOrderState] = useState<OrderState>(EmptyOrderState);
+
+    const calculateTotal = (updatedRows: ProductCard[]) => {
+        const newTotal = updatedRows.reduce((acc, row) => acc + (row.subtotal ?? 0), 0);
+        setTotal(newTotal);
+    };
 
  
 
     const [cartProducts, setCartProducts] = useState<ProductCard[]>(()=>{
         const saveState = localStorage.getItem('cartProducts');
-        return saveState ? JSON.parse(saveState): [];
+        const newSaveState = saveState ? JSON.parse(saveState): [];
+        calculateTotal(newSaveState)
+        return newSaveState;
     });
 
     // Shooping cart - Order
@@ -97,26 +134,15 @@ const ProductProvider = ({children}: ProviderProps) => {
     },[sidebarState])
 
 
-    useEffect(() => {
-        setCount(cartProducts.length); // Actualiza el contador cuando cambian los productos en el carrito
-    }, [cartProducts]);
-
-
     // useEffect(() => {
-    //     const savedProducts = localStorage.getItem('cartProducts');
-    //     console.log(savedProducts, "---");
-    //     if (savedProducts) {
-    //         const parsedProducts = JSON.parse(savedProducts);
-    //         setCartProducts(parsedProducts);
-    //     }
-    // }, []);
+    //     setCount(cartProducts.length); // Actualiza el contador cuando cambian los productos en el carrito
+    // }, [cartProducts]);
 
     useEffect(() => {
-        console.log(cartProducts, "---")
+        setCount(cartProducts.length);
+        calculateTotal(cartProducts);
         localStorage.setItem('cartProducts', JSON.stringify(cartProducts));
     }, [cartProducts]);
-
-   
 
     const createSidebar = (sidebarInfo: SidebarInfo)=>{
         setSidebarState(sidebarInfo);  
@@ -195,6 +221,73 @@ const ProductProvider = ({children}: ProviderProps) => {
         }));
     };
 
+    // : Order | null
+    const showCOrder = (product: COrder | null) => {
+        setCOrderState(prevState => ({
+            ...prevState,
+            currentOrder: product,
+        }));
+    };
+
+    
+    const clearCOrder = () => {
+        setCOrderState(prevState => ({
+            ...prevState,
+            currentProduct: null,
+        }));
+    };
+    
+    const setSearchCOrder = (search: string) => {
+        setCOrderState(prevState => ({
+            ...prevState,
+            search,
+        }));
+    };
+
+
+    const editClient = (client: Client | null) => {
+        setClientState(prevState => ({
+            ...prevState,
+            currentClient: client,
+        }));
+    };
+    
+    const clearClient = () => {
+        setClientState(prevState => ({
+            ...prevState,
+            currentClient: null,
+        }));
+    };
+    
+    const setSearchClient = (search: string) => {
+        setClientState(prevState => ({
+            ...prevState,
+            search,
+        }));
+    };
+
+
+    const editUser = (user: User | null) => {
+        setUserState(prevState => ({
+            ...prevState,
+            currentUser: user,
+        }));
+    };
+    
+    const clearUser = () => {
+        setUserState(prevState => ({
+            ...prevState,
+            setUserState: null,
+        }));
+    };
+    
+    const setSearchUser = (search: string) => {
+        setUserState(prevState => ({
+            ...prevState,
+            search,
+        }));
+    };
+
 
     return (
         <ProductContext.Provider value={{ sidebarState, createSidebar, updateSidebar, resetSidebar,
@@ -202,6 +295,10 @@ const ProductProvider = ({children}: ProviderProps) => {
             brandState,editBrand,clearBrand,setSearchBrand,
             productState, editProduct, clearProduct, setSearchProduct,
             count, cartProducts, setCartProducts,
+            total, 
+            cOrderState, setTotal, showCOrder,clearCOrder,setSearchCOrder,
+            clientState, editClient,clearClient,setSearchClient,
+            userState, editUser,clearUser,setSearchUser
         }}>
             {children}
         </ProductContext.Provider>

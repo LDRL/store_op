@@ -94,12 +94,12 @@ export default function Buy() {
           <Grid2 container spacing={4}>
             {products.map((item, index) => (
               <Card 
+                key={item.id}
                 id={item.id}
                 name={item.name}
                 price={item.price}
-                stock={item.price}
+                stock={item.stock}
                 photo_url={item.photo_url}
-
               />
             ))}
           </Grid2>

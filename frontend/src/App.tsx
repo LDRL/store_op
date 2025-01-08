@@ -8,6 +8,7 @@ import { PrivateRoutes, PublicRoutes } from './utils/routes';
 import AuthGuard from './guards/auth.guard';
 import {AuthProvider} from './context/AuthProvider';
 import { ProductProvider } from './context/ProductProvider';
+import { ToastContainer } from 'react-toastify'
 
 
 
@@ -33,6 +34,10 @@ function App() {
             </RoutersWitNotFound>
           </BrowserRouter>
         </ProductProvider>
+
+        <ToastContainer 
+         pauseOnHover={false}
+         pauseOnFocusLoss={false}/>
       </AuthProvider>
       </Suspense>
 

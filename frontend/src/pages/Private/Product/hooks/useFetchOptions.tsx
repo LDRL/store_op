@@ -18,6 +18,11 @@ interface Marca {
     estado: string | null;
 }
 
+interface Role {
+    id_rol: number;
+    nombre: string;
+}
+
 
 
 interface ApiResponse {
@@ -28,6 +33,11 @@ interface ApiResponse {
 interface ApiMarcaResponse{
     msg: string;
     data: Marca[];
+}
+
+interface ApiRoleResponse{
+    msg: string;
+    data: Role[];
 }
 
 
@@ -79,5 +89,28 @@ const MarcasAdapter = (marcas: Marca[]): Option[] => {
     return marcas.map(marca => ({
         value: marca.id_marca,
         label: marca.nombre,
+    }));
+};
+
+export const useFetchRolOptions = () => {
+    return useQuery<Option[], Error>({
+        queryKey: ['dropdownRole'], // Se maneja como un objeto dentro de useQueryOptions para el uso de TypeScript 
+        queryFn: async() => { // queryFn especifica la funcion para el consumo de la api
+            const response = await clientAxios.get(`${apiUrl}roles`);
+            if(response.status !== 200){
+                throw new Error('Error al cargar las opciones')
+            }
+
+            const data: ApiRoleResponse = await response.data;
+            return RolesAdapter(data.data);
+        }
+    });
+};
+
+
+const RolesAdapter = (roles: Role[]): Option[] => {
+    return roles.map(role => ({
+        value: role.id_rol,
+        label: role.nombre,
     }));
 };

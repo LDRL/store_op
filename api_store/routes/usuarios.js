@@ -17,12 +17,12 @@ router.post('/',
         .notEmpty().withMessage('El nombre no puede ir vacio'),
     body('contraseña')
         .isLength({min:8}).withMessage('La contraseña es muy corta, debe contener 8 caracteres minimo'),
-    body('confirmar_contraseña').custom((value,{req}) => {
-        if(value !== req.body.contraseña){
-            throw new Error('La contraseña no son iguales')
-        }
-        return true
-    }),
+    // body('confirmar_contraseña').custom((value,{req}) => {
+    //     if(value !== req.body.contraseña){
+    //         throw new Error('La contraseña no son iguales')
+    //     }
+    //     return true
+    // }),
     body('email')
         .isEmail().withMessage('Email no válido'),
     handleInputErrors,

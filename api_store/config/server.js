@@ -16,7 +16,8 @@ class Server {
             marcas: '/api/marcas',
             productos: '/api/productos',
             ordenes: '/api/ordenes',
-            clientes: '/api/clientes'
+            clientes: '/api/clientes',
+            roles: '/api/roles'
 
         }
 
@@ -56,6 +57,7 @@ class Server {
         this.app.use(this.paths.productos, require('../routes/productos'))
         this.app.use(this.paths.ordenes, require('../routes/ordenes'))
         this.app.use(this.paths.clientes, require('../routes/clientes'))
+        this.app.use(this.paths.roles, require('../routes/roles'))
         this.app.use('*',(req,res) => {
             res.status(404).json({
                 errors: {

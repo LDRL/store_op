@@ -3,13 +3,15 @@ import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { clearLocalStorage } from "../../../utils/localStorage.utility";
 import { PrivateRoutes, PublicRoutes } from "../../../utils/routes";
-import AuthContext from "../../../context/AuthProvider";
 import { Box, Button, Checkbox, CssBaseline, Divider, FormControl, FormControlLabel, FormLabel, Link, styled, TextField, Typography } from "@mui/material";
 import MuiCard from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import { Controller, useForm } from "react-hook-form";
 import { ILogin } from "./models";
 import { useCreateLogin } from "./hooks/useLogin";
+
+import { toast } from "react-toastify";
+
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -51,21 +53,20 @@ export default function Login() {
   const [loading, setLoading] = useState<boolean>(false);
 
   const navigate = useNavigate();
-  const {createUser} = useContext(AuthContext);
 
   const { control, handleSubmit, formState: { errors } } = useForm<ILogin>();
   const inSing = useCreateLogin();
 
 
-  const login = () => {
-    const user = {id:1, name:"Luis", email:"ffff"};
-    console.log("Login succesful")
-    // dispatch(createSidebar({state: false}))
-    createUser(user);
+  // const login = () => {
+  //   const user = {id:1, name:"Luis", email:"ffff"};
+  //   console.log("Login succesful")
+  //   // dispatch(createSidebar({state: false}))
+  //   createUser(user);
 
-    // dispatch(createUser({id:1, name:"Luis", email:"ffff"}))
-    navigate(`/${PrivateRoutes.PRIVATE}`, {replace:true});
-  }
+  //   // dispatch(createUser({id:1, name:"Luis", email:"ffff"}))
+  //   navigate(`/${PrivateRoutes.PRIVATE}`, {replace:true});
+  // }
   
   {/* <button onClick={login}>Login</button> */}
 
@@ -76,8 +77,12 @@ export default function Login() {
     try {
       await inSing.mutateAsync(data);
       navigate(`/${PrivateRoutes.PRIVATE}`, {replace:true});
-    } catch (error) {
-      console.log(error)
+    } catch (error:any) {
+      if (error && error.response && error.response.data) {
+        toast.error(error.response.data.error);
+      } else {
+        toast.error("Ocurrió un error desconocido.");
+      }
     }
     finally{
       setLoading(false)

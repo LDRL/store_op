@@ -21,5 +21,20 @@ export const PrivateRoutes = {
     BUY: 'buy',
     BUY_CREATE: 'buy/create',
     BUY_CHECKOUT:'buy/checkout',
+    BUY_ORDER:'client/order',
+    BUY_ORDER_SHOW:'client/order/:id/show',
+
+    SALE: 'sale',
+    SALE_SHOW: 'sale/:id/show',
+
+
+    CLIENT: 'client',
+    CLIENT_CREATE: 'client/create',
+    CLIENT_EDIT: 'client/:id/editar',
+
+
+    USER: 'user',
+    USER_CREATE: 'user/create',
+    USER_EDIT: 'user/:id/editar',
 
 }

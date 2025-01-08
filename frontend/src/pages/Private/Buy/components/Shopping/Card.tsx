@@ -12,6 +12,16 @@ interface CardProps {
     children?: React.ReactNode;
 }
 
+interface ProductCard {
+    id: number;
+    name: string;
+    price: number;
+    stock: number;
+    photo_url: string;
+    amount: number;
+    subtotal: number;
+}
+
 function Card({ id, name, price, stock, photo_url }: CardProps) {
     const { cartProducts, setCartProducts } = useProductContext(); // Obtenemos el estado y el setter del carrito
     const [selectedQuantity, setSelectedQuantity] = useState<{ [key: number]: number }>({});
@@ -19,6 +29,8 @@ function Card({ id, name, price, stock, photo_url }: CardProps) {
 
     const isOutOfStock = stock === 0;
     const quantity = selectedQuantity[id] || 0; // Si no hay cantidad seleccionada, se asigna 0
+
+    
 
     useEffect(() => {
         // Verificar si el producto está en localStorage y obtener la cantidad
@@ -31,7 +43,7 @@ function Card({ id, name, price, stock, photo_url }: CardProps) {
                 // Si el producto está en el carrito, actualizar la cantidad
                 setSelectedQuantity((prev) => ({
                     ...prev,
-                    [id]: productInCart.cantidad, // Se coloca la cantidad almacenada
+                    [id]: productInCart.amount, // Se coloca la cantidad almacenada
                 }));
                 setIsAddingToCart((prev) => ({
                     ...prev,
@@ -52,12 +64,13 @@ function Card({ id, name, price, stock, photo_url }: CardProps) {
                 product.id === productId
                     ? {
                         ...product,
-                        cantidad: product.cantidad + 1,
-                        sub_total: (product.cantidad + 1) * product.price,
+                        amount: product.amount + 1,
+                        subtotal: (product.amount + 1) * product.price,
                     }
                     : product
             )
         );
+
     };
 
     const handleDecrease = (productId: number) => {
@@ -75,17 +88,16 @@ function Card({ id, name, price, stock, photo_url }: CardProps) {
                     product.id === productId
                         ? {
                             ...product,
-                            cantidad: Math.max(0, product.cantidad - 1),
-                            sub_total: Math.max(0, (product.cantidad - 1)) * product.price,
+                            amount: Math.max(0, product.amount - 1),
+                            subtotal: Math.max(0, (product.amount - 1)) * product.price,
                         }
                         : product
                 )
-                .filter((product) => product.cantidad > 0); // Filtramos productos con cantidad > 0
+                .filter((product) => product.amount > 0); // Filtramos productos con cantidad > 0
 
             console.log(updatedCart, "----")
 
             const filterProductoId = updatedCart.filter((product) => product.id === productId)
-            console.log(filterProductoId);
 
             
             if(filterProductoId.length ===0)
@@ -95,8 +107,7 @@ function Card({ id, name, price, stock, photo_url }: CardProps) {
                     [productId]: false, // Esto hace que el botón "Agregar al carrito" se muestre nuevamente
                 }));
             }
-            
-               
+
             return updatedCart;
         });
 
@@ -132,18 +143,18 @@ function Card({ id, name, price, stock, photo_url }: CardProps) {
                     product.id === productId
                         ? {
                             ...product,
-                            cantidad: value,
-                            sub_total: value * product.price,
+                            amount: value,
+                            subtotal: value * product.price,
                         }
                         : product
                 )
-                .filter((product) => product.cantidad > 0); // Filtramos productos con cantidad > 0
+                .filter((product) => product.amount > 0); // Filtramos productos con cantidad > 0
             return updatedCart;
         });
     };
 
     const handleAddToCart = (productId: number, event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        event.stopPropagation(); // Evita que el clic pase al Link
+        event.stopPropagation()
 
         // Si no se ha especificado una cantidad, se establece en 1
         if (!selectedQuantity[productId] || selectedQuantity[productId] === 0) {
@@ -163,8 +174,8 @@ function Card({ id, name, price, stock, photo_url }: CardProps) {
                     product.id === productId
                         ? {
                             ...product,
-                            cantidad: product.cantidad + selectedQuantity[productId],
-                            sub_total: (product.cantidad + selectedQuantity[productId]) * product.price,
+                            amount: product.amount + selectedQuantity[productId],
+                            subtotal: (product.amount + selectedQuantity[productId]) * product.price,
                         }
                         : product
                 )
@@ -179,28 +190,19 @@ function Card({ id, name, price, stock, photo_url }: CardProps) {
                     price,
                     stock: 0,
                     photo_url,
-                    cantidad: selectedQuantity[productId] || 1, // Se asegura de que la cantidad no sea cero
-                    sub_total: (selectedQuantity[productId] || 1) * price, // Se calcula el subtotal
+                    amount: selectedQuantity[productId] || 1, // Se asegura de que la cantidad no sea cero
+                    subtotal: (selectedQuantity[productId] || 1) * price, // Se calcula el subtotal
                 },
             ]);
         }
 
-
-        // interface ProductCard {
-        //     id: number;
-        //     name: string;
-        //     price: number;
-        //     stock: number;
-        //     photo_url: string;
-        //     cantidad: number;
-        //     sub_total: number;
-        // }
 
         // Establecemos que estamos agregando al carrito
         setIsAddingToCart((prev) => ({
             ...prev,
             [productId]: true,
         }));
+
     };
 
     return (

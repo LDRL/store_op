@@ -5,7 +5,6 @@ import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import List from '@mui/material/List';
 import CssBaseline from '@mui/material/CssBaseline';
-import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -19,7 +18,23 @@ import {Outlet, useNavigate } from 'react-router-dom';
 import { LinksArray } from '../../utils/dataEstatica';
 import { useState } from 'react';
 import  { useProductContext } from '../../context/ProductProvider';
+import { Menu, MenuItem } from '@mui/material';
 
+import MoreIcon from '@mui/icons-material/MoreVert';
+import { AccountCircle } from '@mui/icons-material';
+import { PublicRoutes } from '@/utils/routes';
+
+
+interface User{
+  nombre: string;
+  correo_electronico: string;
+  id_usuario: number;
+  id_rol:number;
+}
+
+interface SidebarProps{
+  user: User
+}
 
 const drawerWidth = 240;
 
@@ -105,41 +120,117 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   }),
 );
 
-export default function SideBar() {
-  const theme = useTheme();
-  const {sidebarState, createSidebar,updateSidebar} = useProductContext();
+export default function SideBar({user}: SidebarProps) {
 
-  const [subnav, setSubnav] = useState(false);
+  ///Estados del sidebar
+  const theme = useTheme();
+  const {sidebarState,updateSidebar} = useProductContext();
 
   const navigate = useNavigate();
+  
+  //// Estados para el dropdown del user
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
+    useState<null | HTMLElement>(null);
+
+  const isMenuOpen = Boolean(anchorEl);
+  const mobileMenuId = 'primary-search-account-menu-mobile';
+  const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+
+  ///// Filtrar por roles
+  const getFilteredLinks = () => {
+      return LinksArray.filter(permiso => permiso.role.includes(user.id_rol));
+  };
 
   const showSidebar = () =>{
     updateSidebar({state: !sidebarState.state});
-    if(sidebarState.state){
-      setSubnav(false);
-    }
   }
-
-  const showSubnav = () => {
-    if (!subnav && sidebarState.state) {
-      console.log("texto - p");
-    } else {
-      createSidebar({state: !sidebarState.state});
-    }
-    setSubnav(prevSubnav => !prevSubnav);
-  };
-
-  
 
   const handleDrawerClose = () => {
     updateSidebar({state: !sidebarState.state});
   };
 
+  const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMobileMenuClose = () => {
+    setMobileMoreAnchorEl(null);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    handleMobileMenuClose();
+  };
+
+  const handleMobileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setMobileMoreAnchorEl(event.currentTarget);
+  };
+
+  const logout = () =>{
+    localStorage.removeItem('cartProducts')
+    localStorage.removeItem('AUTH_TOKEN')
+    navigate(`${PublicRoutes.LOGIN}`, {replace:true})
+  }
+
+  const menuId = 'primary-search-account-menu';
+  const renderMenu = (
+    <Menu
+      anchorEl={anchorEl}
+      anchorOrigin={{
+        vertical: 'top',
+        horizontal: 'right',
+      }}
+      id={menuId}
+      keepMounted
+      transformOrigin={{
+        vertical: 'top',
+        horizontal: 'right',
+      }}
+      open={isMenuOpen}
+      onClose={handleMenuClose}
+    >
+      <MenuItem onClick={logout}>cerrar sesión</MenuItem>
+      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+    </Menu>
+  );
+
+  const renderMobileMenu = (
+    <Menu
+      anchorEl={mobileMoreAnchorEl}
+      anchorOrigin={{
+        vertical: 'top',
+        horizontal: 'right',
+      }}
+      id={mobileMenuId}
+      keepMounted
+      transformOrigin={{
+        vertical: 'top',
+        horizontal: 'right',
+      }}
+      open={isMobileMenuOpen}
+      onClose={handleMobileMenuClose}
+    >
+      <MenuItem onClick={handleProfileMenuOpen}>
+        <IconButton
+          size="large"
+          aria-label="account of current user"
+          aria-controls="primary-search-account-menu"
+          aria-haspopup="true"
+          color="inherit"
+        >
+          <AccountCircle />
+        </IconButton>
+        <p>Profile</p>
+      </MenuItem>
+    </Menu>
+  );
   return (
-    <Box sx={{ display: 'flex' }}>
+    
+    <Box>
       <CssBaseline />
-      <AppBar position="fixed" open={sidebarState.state}>
-        <Toolbar>
+      <AppBar position="fixed" open={sidebarState.state} >
+        <Toolbar >
           <IconButton
             color="inherit"
             aria-label="open drawer"
@@ -154,11 +245,39 @@ export default function SideBar() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
+
+          <Box sx={{ flexGrow: 1 }} />
+          <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
             
-          </Typography>
+            <IconButton
+              size="large"
+              edge="end"
+              aria-label="account of current user"
+              aria-controls={menuId}
+              aria-haspopup="true"
+              onClick={handleProfileMenuOpen}
+              color="inherit"
+            >
+              <AccountCircle />
+            </IconButton>
+          </Box>
+          <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
+            <IconButton
+              size="large"
+              aria-label="show more"
+              aria-controls={mobileMenuId}
+              aria-haspopup="true"
+              onClick={handleMobileMenuOpen}
+              color="inherit"
+            >
+              <MoreIcon />
+            </IconButton>
+          </Box>
         </Toolbar>
       </AppBar>
+
+      {renderMenu}
+      {renderMobileMenu}
       <Drawer variant="permanent" open={sidebarState.state}>
         <DrawerHeader>
           <IconButton onClick={handleDrawerClose}>
@@ -167,7 +286,7 @@ export default function SideBar() {
         </DrawerHeader>
         <Divider />
         <List>
-            {LinksArray.map(({icon, label, to}, index) => (
+            {getFilteredLinks().map(({icon, label, to}, index) => (
                 <ListItem key={index} disablePadding sx={{display: "block"}} onClick={()=>{navigate(to)}}>
                     <ListItemButton
                         sx={{
@@ -192,7 +311,7 @@ export default function SideBar() {
         </List>
       
       </Drawer>
-      <Box component="main" sx={{ flexGrow: 1, paddingTop: 7, paddingX:3  }}>
+      <Box component="main" sx={{ flexGrow: 1, paddingTop: 7, paddingX:10}}>
       {/* sx={{ flexGrow: 1, paddingTop: 7, paddingX:3  }} */}
         <Outlet />
       </Box>

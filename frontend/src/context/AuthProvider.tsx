@@ -5,12 +5,14 @@ export interface UserInfo {
   id: number;
   name: string;
   email: string;
+  role: number;
 }
 
 export const EmptyUserState: UserInfo = {
   id: 0,
   name: "",
-  email: ""
+  email: "",
+  role: 0
 };
 
 export const userKey = 'user';
@@ -22,6 +24,8 @@ interface AuthContextType {
     updateUser: (user: Partial<UserInfo>) => void;
     resetUser: () => void;
     loading: boolean;
+    hasRole: (role: number) => boolean;
+    
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -30,6 +34,7 @@ const AuthContext = createContext<AuthContextType>({
     updateUser: () => {},
     resetUser: () => {},
     loading: true,
+    hasRole: () => false,
 });
 
 interface AuthProviderProps {
@@ -44,15 +49,14 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
     useEffect(() => {
         // Cargar el usuario desde localStorage al montar el componente
         const storedUser = localStorage.getItem(userKey);
+        console.log(storedUser,"----- init");
         if (storedUser) {
             setAuth(JSON.parse(storedUser));
         }
         setLoading(false);
     }, []);
 
-    useEffect(() => {
-    }, [auth]);
-
+   
     const createUser = (user: UserInfo) => {
         setAuth(user);
         persistLocalStorage<UserInfo>(userKey, user);  // Guardar en localStorage
@@ -68,9 +72,14 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
         setAuth(EmptyUserState);
         clearLocalStorage(userKey);  // Limpiar localStorage
     };
+    
+    const hasRole = (role: number) => {
+        return auth.role === role;
+      };
+    
 
     return (
-        <AuthContext.Provider value={{ auth, createUser, updateUser, resetUser,loading }}>
+        <AuthContext.Provider value={{ auth, createUser, updateUser, resetUser,loading, hasRole }}>
             {children}
         </AuthContext.Provider>
     );

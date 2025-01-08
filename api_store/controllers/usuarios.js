@@ -62,26 +62,51 @@ const getUsuario = (req= request, res= response) => {
 }
 
 const usuariosPost = async (req, res= response) => {
-    const { email, nombre, contraseña, telefono, fecha_nacimiento, id_rol } = req.body;
+    const { email, nombre, contraseña, telefono, fecha_nacimiento, id_rol, id_cliente } = req.body;
+
     const hashedPassword = await hashPassword(contraseña)
 
     try {
-        const result = await dbConnect.query(
-            `EXEC UsuarioInsertar @P_CORREO_ELECTRONICO = ?,
-            @P_NOMBRE = ?,
-            @P_PASSWORD = ?,
-            @P_TELEFONO = ?,
-            @P_FECHA_NACIMIENTO = ?,
-            @P_ID_ROL = ?`,
-            {
-                replacements: [email, nombre, hashedPassword, telefono, fecha_nacimiento, id_rol],
-                type: dbConnect.QueryTypes.SELECT
-            }
-        );
-        res.status(201).json({
-            msg: 'usuaio creado correctamente',
-            data: result
-        })
+        if(id_rol === 3){
+            const result = await dbConnect.query(
+                `EXEC UsuarioClienteInsertar 
+                @P_CORREO_ELECTRONICO = ?,
+                @P_NOMBRE = ?,
+                @P_PASSWORD = ?,
+                @P_TELEFONO = ?,
+                @P_FECHA_NACIMIENTO = ?,
+                @P_ID_CLIENTE = ?`,
+                {
+                    replacements: [email, nombre, hashedPassword, telefono, fecha_nacimiento, id_cliente],
+                    type: dbConnect.QueryTypes.SELECT
+                }
+            );
+
+            res.status(201).json({
+                msg: 'usuaio creado correctamente',
+                data: result
+            })
+        }else{
+            const result = await dbConnect.query(
+                `EXEC UsuarioInsertar @P_CORREO_ELECTRONICO = ?,
+                @P_NOMBRE = ?,
+                @P_PASSWORD = ?,
+                @P_TELEFONO = ?,
+                @P_FECHA_NACIMIENTO = ?,
+                @P_ID_ROL = ?`,
+                {
+                    replacements: [email, nombre, hashedPassword, telefono, fecha_nacimiento, id_rol],
+                    type: dbConnect.QueryTypes.SELECT
+                }
+            );
+
+            res.status(201).json({
+                msg: 'usuaio creado correctamente',
+                data: result
+            })
+        }
+        
+        
         
     } catch (error) {
         console.error('Error al insertar el usuario:', error);
